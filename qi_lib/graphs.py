@@ -6,7 +6,6 @@ def create_graph(num_nodes, edges):
     out.add_nodes_from(range(num_nodes))
     # The edge syntax is (start, end, weight)
     out.add_edges_from(edges)
-
     return out
 
 def draw_graph(graph, filename="graph.jpg", node_color=None):

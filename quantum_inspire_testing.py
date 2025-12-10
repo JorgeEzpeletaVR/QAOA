@@ -47,6 +47,6 @@ x = minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, loca
 # x = [3.8471405, 0.29315694, 4.99223468, 1.14716908]
 print("Optimised parameters:", x)
 node_groupings = get_node_groupings_from_circuit_parameters(max_ansatz, x, local=LOCAL, backend_name=QI_BACKEND, qubit_priority_list=QI_QUBIT_PRIORITY_LIST, num_shots=NODE_GROUPING_NUM_SHOTS)
-print("Node groupings:", x)
+print("Node groupings:", node_groupings)
 
 draw_graph(graph, filename="graph_coloured.jpg", node_color=["r" if node_groupings[i] == 0 else "c" for i in range(N)])
