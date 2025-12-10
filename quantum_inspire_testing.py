@@ -6,10 +6,13 @@ from qi_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_
 
 N = 4
 EDGES = [(0, 1, 1.0), (0, 2, 1.0), (0, 3, 1.0), (1, 2, 1.0), (2, 3, 1.0)]
-LOCAL = True
-
 # N = 5
 # EDGES = [(0, 1, 1.0), (1, 2, 1.0), (2, 3, 1.0), (3, 0, 1.0), (0, 4, 1.0), (3, 4, 1.0)]
+OPTIMIZER_NUM_SHOTS = 256
+NODE_GROUPING_NUM_SHOTS = 1024
+LOCAL = False
+QI_BACKEND = "QX emulator"
+QI_QUBIT_PRIORITY_LIST = [2, 0, 1, 3, 4]
 
 
 def cost_func(params, ansatz, hamiltonian, estimator):
@@ -40,10 +43,10 @@ max_ansatz = QAOAAnsatz(max_hamiltonian, reps=2)
 x0 = get_random_parameters(max_ansatz.num_parameters)
 print("Initial parameters:", x0)
 # Optimise circuit parameters
-# x = minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, local=LOCAL)
-x = [3.8471405, 0.29315694, 4.99223468, 1.14716908]
+x = minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, local=LOCAL, backend_name=QI_BACKEND, qubit_priority_list=QI_QUBIT_PRIORITY_LIST, num_shots=OPTIMIZER_NUM_SHOTS)
+# x = [3.8471405, 0.29315694, 4.99223468, 1.14716908]
 print("Optimised parameters:", x)
-node_groupings = get_node_groupings_from_circuit_parameters(max_ansatz, x, local=LOCAL)
+node_groupings = get_node_groupings_from_circuit_parameters(max_ansatz, x, local=LOCAL, backend_name=QI_BACKEND, qubit_priority_list=QI_QUBIT_PRIORITY_LIST, num_shots=NODE_GROUPING_NUM_SHOTS)
 print("Node groupings:", x)
 
 draw_graph(graph, filename="graph_coloured.jpg", node_color=["r" if node_groupings[i] == 0 else "c" for i in range(N)])

@@ -13,11 +13,10 @@ from scipy.optimize import minimize
 def get_random_parameters(num_params):
     return 2 * np.pi * np.random.rand(num_params)
 
-def get_backend_and_transpile(qc):
+def get_backend_and_transpile(qc, backend_name, qubit_priority_list):
     provider = QIProvider()
-    backend = provider.get_backend("QX emulator")
+    backend = provider.get_backend(backend_name)
 
-    qubit_priority_list = [2, 0, 1, 3, 4]
     qc_transpiled = transpile(qc, backend, initial_layout=qubit_priority_list[0:qc.num_qubits])
     return backend, qc_transpiled
 
@@ -26,35 +25,35 @@ def _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian, estima
         cost_func, x0, args=(max_ansatz, max_hamiltonian, estimator), method="COBYLA"
     )
 
-def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, local=True):
+def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, local=True, backend_name, qubit_priority_list, num_shots):
     if local:
         estimator = StatevectorEstimator()
         result = _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian, estimator)
     else:
-        backend, max_ansatz_transpiled = get_backend_and_transpile(max_ansatz)
+        backend, max_ansatz_transpiled = get_backend_and_transpile(max_ansatz, backend_name, qubit_priority_list)
         max_hamiltonian_mapped = max_hamiltonian.apply_layout(max_ansatz_transpiled.layout)
         with Session(backend=backend) as session:
-            estimator = Estimator(mode=session, options=EstimatorOptions(resilience_level=1, default_shots=256))
-            result = _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian_mapped, estimator)
+            estimator = Estimator(mode=session, options=EstimatorOptions(resilience_level=1, default_shots=num_shots))
+            result = _do_circ_param_minimising(cost_func, x0, max_ansatz_transpiled, max_hamiltonian_mapped, estimator)
     return result.x
 
-def _do_node_groupings_sampling(qc, sampler):
-    job = sampler.run([qc], shots=1024)
+def _do_node_groupings(qc, sampler, *, num_shots):
+    job = sampler.run([qc], shots=num_shots)
     data_pub = job.result()[0].data
     return data_pub.meas.get_counts()
 
-def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, local=True):
+def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, local=True, backend_name, qubit_priority_list, num_shots):
     qc = max_ansatz.assign_parameters(min_circ_param)
     qc.measure_all()
 
     if local:
         sampler = StatevectorSampler()
-        counts = _do_node_groupings_sampling(qc, sampler)
+        counts = _do_node_groupings(qc, sampler, num_shots=num_shots)
     else:
-        backend, qc_transpiled = get_backend_and_transpile(qc)
+        backend, qc_transpiled = get_backend_and_transpile(qc, backend_name, qubit_priority_list)
         with Session(backend=backend) as session:
             sampler = Sampler(mode=session)
-            counts = _do_node_groupings_sampling(qc_transpiled, sampler)
+            counts = _do_node_groupings(qc_transpiled, sampler, num_shots=num_shots)
 
     binary_string = max(counts.items(), key=lambda kv: kv[1])[0]
     return [int(y) for y in reversed(list(binary_string))]
