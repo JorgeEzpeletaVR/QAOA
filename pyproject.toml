@@ -11,4 +11,5 @@ dependencies = [
     "pylatexenc>=2.10",
     "rustworkx>=0.17.1",
     "qiskit-ibm-runtime>=0.43.1",
+    "notebook>=7.5.0",
 ]
