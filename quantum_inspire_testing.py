@@ -6,7 +6,7 @@ from qi_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_
 
 N = 4
 EDGES = [(0, 1, 1.0), (0, 2, 1.0), (0, 3, 1.0), (1, 2, 1.0), (2, 3, 1.0)]
-LOCAL = False
+LOCAL = True
 
 # N = 5
 # EDGES = [(0, 1, 1.0), (1, 2, 1.0), (2, 3, 1.0), (3, 0, 1.0), (0, 4, 1.0), (3, 4, 1.0)]
