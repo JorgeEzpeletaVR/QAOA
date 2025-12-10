@@ -1,0 +1,14 @@
+[project]
+name = "qaoa"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "qiskit-quantuminspire>=0.13.0",
+    "qiskit",
+    "matplotlib>=3.10.7",
+    "pylatexenc>=2.10",
+    "rustworkx>=0.17.1",
+    "qiskit-ibm-runtime>=0.43.1",
+]
