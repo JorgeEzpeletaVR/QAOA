@@ -6,7 +6,7 @@ from qi_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_
 
 N = 4
 EDGES = [(0, 1, 1.0), (0, 2, 1.0), (0, 3, 1.0), (1, 2, 1.0), (2, 3, 1.0)]
-LOCAL = True
+LOCAL = False
 
 # N = 5
 # EDGES = [(0, 1, 1.0), (1, 2, 1.0), (2, 3, 1.0), (3, 0, 1.0), (0, 4, 1.0), (3, 4, 1.0)]
@@ -35,11 +35,13 @@ draw_graph(graph)
 max_hamiltonian = SparsePauliOp.from_list(graph_to_pauli_list(N, EDGES))
 # Generate ansatz from Hamiltonain
 max_ansatz = QAOAAnsatz(max_hamiltonian, reps=2)
+# max_ansatz.draw("mpl", filename="max_ansatz.jpg")
 # Get initial params
 x0 = get_random_parameters(max_ansatz.num_parameters)
 print("Initial parameters:", x0)
 # Optimise circuit parameters
-x = minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, local=LOCAL)
+# x = minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, local=LOCAL)
+x = [3.8471405, 0.29315694, 4.99223468, 1.14716908]
 print("Optimised parameters:", x)
 node_groupings = get_node_groupings_from_circuit_parameters(max_ansatz, x, local=LOCAL)
 print("Node groupings:", x)

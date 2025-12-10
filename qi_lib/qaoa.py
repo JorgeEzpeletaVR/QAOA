@@ -1,4 +1,5 @@
 import numpy as np
+from qiskit import transpile
 from qiskit.primitives import StatevectorEstimator
 from qiskit.primitives import StatevectorSampler
 from qiskit_ibm_runtime import EstimatorOptions
@@ -23,10 +24,15 @@ def _minimise_circuit_parameters_qi(cost_func, x0, max_ansatz, max_hamiltonian):
     backend = provider.get_backend("QX emulator")
     estimator_options = EstimatorOptions(resilience_level=1, default_shots=256)
 
+    qubit_priority_list = [2, 0, 1, 3, 4]
+    max_ansatz_transpiled = transpile(max_ansatz, backend, initial_layout=qubit_priority_list[0:max_ansatz.num_qubits])
+    # max_ansatz_transpiled.draw("mpl", filename="max_ansatz_transpiled.jpg")
+    max_hamiltonian_mapped = max_hamiltonian.apply_layout(max_ansatz_transpiled.layout)
+
     with Session(backend=backend) as session:
         estimator = Estimator(mode=session, options=estimator_options)
         return minimize(
-            cost_func, x0, args=(max_ansatz, max_hamiltonian, estimator), method="COBYLA"
+            cost_func, x0, args=(max_ansatz_transpiled, max_hamiltonian_mapped, estimator), method="COBYLA"
         )
 
 def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, local=True):
@@ -45,9 +51,13 @@ def _get_node_groupings_from_circuit_parameters_local(qc):
 def _get_node_groupings_from_circuit_parameters_qi(qc):
     provider = QIProvider()
     backend = provider.get_backend("QX emulator")
+
+    qubit_priority_list = [2, 0, 1, 3, 4]
+    qc_transpiled = transpile(qc, backend, initial_layout=qubit_priority_list[0:qc.num_qubits])
+
     with Session(backend=backend) as session:
         sampler = Sampler(mode=session)
-        job = sampler.run([qc], shots=1024)
+        job = sampler.run([qc_transpiled], shots=1024)
         data_pub = job.result()[0].data
         return data_pub.meas.get_counts()
 
