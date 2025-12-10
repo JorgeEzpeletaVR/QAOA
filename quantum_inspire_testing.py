@@ -1,12 +1,12 @@
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit.quantum_info import SparsePauliOp
 
-from quantum_inspire_testing.graphs import create_graph, draw_graph, graph_to_pauli_list
-from quantum_inspire_testing.qaoa import get_random_parameters, minimise_circuit_parameters, \
-    get_node_groupings_from_circuit_parameters
+from qi_lib.graphs import create_graph, draw_graph, graph_to_pauli_list
+from qi_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_node_groupings_from_circuit_parameters
 
 N = 4
 EDGES = [(0, 1, 1.0), (0, 2, 1.0), (0, 3, 1.0), (1, 2, 1.0), (2, 3, 1.0)]
+LOCAL = True
 
 # N = 5
 # EDGES = [(0, 1, 1.0), (1, 2, 1.0), (2, 3, 1.0), (3, 0, 1.0), (0, 4, 1.0), (3, 4, 1.0)]
@@ -39,9 +39,9 @@ max_ansatz = QAOAAnsatz(max_hamiltonian, reps=2)
 x0 = get_random_parameters(max_ansatz.num_parameters)
 print("Initial parameters:", x0)
 # Optimise circuit parameters
-x = minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian)
+x = minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, local=LOCAL)
 print("Optimised parameters:", x)
-node_groupings = get_node_groupings_from_circuit_parameters(max_ansatz, x)
+node_groupings = get_node_groupings_from_circuit_parameters(max_ansatz, x, local=LOCAL)
 print("Node groupings:", x)
 
 draw_graph(graph, filename="graph_coloured.jpg", node_color=["r" if node_groupings[i] == 0 else "c" for i in range(N)])
