@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from qiskit import transpile
 from qiskit.primitives import StatevectorEstimator
 from qiskit.primitives import StatevectorSampler
@@ -82,4 +83,41 @@ def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, lo
 
     # Convert the measurement tallies to node groupings
     binary_string = max(counts.items(), key=lambda kv: kv[1])[0]
-    return [int(y) for y in reversed(list(binary_string))]
+    return [int(y) for y in reversed(list(binary_string))], counts
+
+def plot_histogram_weighted(counts, edges, filename="histogram_result.jpg"):
+    """
+    Plots a histogram where the optimal solutions are green and non-optimal solutions are grey
+    """
+
+    # THIS SHOULD BE GENERALIZED
+    optimal_cut = 6
+    optimal_hits = 0
+    
+    labels, values, colors = [], [], []
+
+    # Calculate the cut value of each solution
+    for bitstring, count in counts.items():
+        nodes = [int(bit) for bit in bitstring]
+        current_cut = 0
+        for u, v, w in edges:
+            if nodes[u] != nodes[v]:
+                current_cut += w  
+        labels.append(bitstring)
+        values.append(count)
+        
+        if current_cut == optimal_cut:
+            colors.append('#2ecc71')
+            optimal_hits += count 
+        else:
+            colors.append('#95a5a6')
+
+    print(f"Percentage of optimal solutions: {optimal_hits / sum(values) * 100}%")
+
+    plt.figure(figsize=(20, 15))
+    plt.bar(labels, values, color=colors)
+    plt.xlabel('Solutions')
+    plt.ylabel('Count')
+    plt.title('Max-cut histogram')
+    plt.savefig(filename)
+    plt.close()
