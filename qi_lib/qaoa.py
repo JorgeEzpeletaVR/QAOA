@@ -29,21 +29,21 @@ def get_backend_and_transpile(qc, backend_name, qubit_priority_list):
     qc_transpiled = transpile(qc, backend, initial_layout=qubit_priority_list[0:qc.num_qubits])
     return backend, qc_transpiled
 
-def _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian, estimator):
+def _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian, estimator, max_iter, tol):
     """
     Helper function for repeated code in circuit parameter optimisation function
     """
     return minimize(
-        cost_func, x0, args=(max_ansatz, max_hamiltonian, estimator), method="COBYLA"
+        cost_func, x0, args=(max_ansatz, max_hamiltonian, estimator), method="COBYLA",options={'maxiter': max_iter, 'tol': tol}
     )
 
-def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, local=True, backend_name, qubit_priority_list, num_shots):
+def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, local=True, backend_name, qubit_priority_list, num_shots, max_iter=30,tol=0.001):
     """
     Minimise cost function (cost_func) for a given random start parameter (x0) for a given ansatz (max_ansatz) and hamiltonian (max_hamiltonian)
     """
     if local:
         estimator = StatevectorEstimator()
-        result = _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian, estimator)
+        result = _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian, estimator, max_iter, tol)
     else:
         # Get the backend and transpiled circuit
         backend, max_ansatz_transpiled = get_backend_and_transpile(max_ansatz, backend_name, qubit_priority_list)
@@ -53,7 +53,7 @@ def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, l
         max_hamiltonian_mapped = max_hamiltonian.apply_layout(max_ansatz_transpiled.layout)
         with Session(backend=backend) as session:
             estimator = Estimator(mode=session, options=EstimatorOptions(resilience_level=1, default_shots=num_shots))
-            result = _do_circ_param_minimising(cost_func, x0, max_ansatz_transpiled, max_hamiltonian_mapped, estimator)
+            result = _do_circ_param_minimising(cost_func, x0, max_ansatz_transpiled, max_hamiltonian_mapped, estimator, max_iter, tol)
     # We only care about the circuit parameters in the result
     return result.x
 
@@ -85,13 +85,15 @@ def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, lo
     binary_string = max(counts.items(), key=lambda kv: kv[1])[0]
     return [int(y) for y in reversed(list(binary_string))], counts
 
-def plot_histogram_weighted(counts, edges, filename="histogram_result.jpg"):
+def plot_histogram(counts, edges, filename="histogram_result.jpg"):
     """
     Plots a histogram where the optimal solutions are green and non-optimal solutions are grey
+    Computes the percetage of optimal solutions (the optimal solution must be adapted)
+    QI: the same histogram is displayed in the last project created for the run in https://compute.quantum-inspire.com/projects
     """
 
-    # THIS SHOULD BE GENERALIZED
-    optimal_cut = 6
+    # THIS SHOULD BE CHANGED DEPENDING ON THE TEST
+    optimal_cut = 4
     optimal_hits = 0
     
     labels, values, colors = [], [], []
@@ -112,12 +114,16 @@ def plot_histogram_weighted(counts, edges, filename="histogram_result.jpg"):
         else:
             colors.append('#95a5a6')
 
-    print(f"Percentage of optimal solutions: {optimal_hits / sum(values) * 100}%")
+    # Calculate the percentage of optimal solutions
+    percentage=optimal_hits / sum(values) * 100
+    print(f"Percentage of optimal solutions: {percentage}%")
+    text_str = f"Optimal solutions: {percentage:.2f}%"
 
     plt.figure(figsize=(20, 15))
     plt.bar(labels, values, color=colors)
     plt.xlabel('Solutions')
     plt.ylabel('Count')
     plt.title('Max-cut histogram')
+    plt.text(0.95, 0.95, text_str, transform=plt.gca().transAxes, fontsize=26,verticalalignment='top', horizontalalignment='right',bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     plt.savefig(filename)
     plt.close()
