@@ -93,7 +93,7 @@ def plot_histogram(counts, edges, filename="histogram_result.jpg"):
     """
 
     # THIS SHOULD BE CHANGED DEPENDING ON THE TEST
-    optimal_cut = 4
+    optimal_cut = 6
     optimal_hits = 0
     
     labels, values, colors = [], [], []
