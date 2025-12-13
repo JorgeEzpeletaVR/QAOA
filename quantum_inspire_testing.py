@@ -1,9 +1,11 @@
+# OUTDATED, TRY TO NOT USE IT
+
 import os
 from qiskit.circuit.library import QAOAAnsatz
 from qiskit.quantum_info import SparsePauliOp
 
-from qi_lib.graphs import create_graph, draw_graph, graph_to_pauli_list
-from qi_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_node_groupings_from_circuit_parameters, plot_histogram
+from lib.graphs import create_graph, draw_graph, graph_to_pauli_list
+from lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_node_groupings_from_circuit_parameters, plot_histogram
 
 
 # Name of the test
