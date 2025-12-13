@@ -7,7 +7,7 @@ from qi_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_
 
 
 # Name of the test
-TEST_NAME="ExampleTest"
+TEST_NAME="QI_T5_20_2"
 os.makedirs(os.path.join("test_results", TEST_NAME), exist_ok=True)
 
 # First Alex's test
@@ -23,14 +23,14 @@ OPTIMIZER_NUM_SHOTS = 256
 # Number of measurements made to the final circuit
 NODE_GROUPING_NUM_SHOTS = 1024
 # Maximum number of iterations of the optimizer (the minimum is #params + 2)
-MAX_ITER=4
+MAX_ITER=20
 # Tolerance of the optimizer
 TOL=0.001
 # Layers of the circuit
-REPS=1
+REPS=2
 
-LOCAL = True
-QI_BACKEND = "QX emulator"
+LOCAL = False
+QI_BACKEND = "Tuna-5"
 QI_QUBIT_PRIORITY_LIST = [0, 1, 2, 3, 4]
 
 

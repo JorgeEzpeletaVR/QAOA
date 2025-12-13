@@ -52,7 +52,7 @@ def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, l
         #    scaled to match)
         max_hamiltonian_mapped = max_hamiltonian.apply_layout(max_ansatz_transpiled.layout)
         with Session(backend=backend) as session:
-            estimator = Estimator(mode=session, options=EstimatorOptions(resilience_level=1, default_shots=num_shots))
+            estimator = Estimator(mode=session, options=EstimatorOptions(resilience_level=1, default_shots=num_shots, max_execution_time=3600))
             result = _do_circ_param_minimising(cost_func, x0, max_ansatz_transpiled, max_hamiltonian_mapped, estimator, max_iter, tol)
     # We only care about the circuit parameters in the result
     return result.x
