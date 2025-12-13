@@ -60,8 +60,8 @@ BACKEND_QI = "QX emulator"
 QUBIT_PRIORITY =  [0, 1, 2, 3, 4]
 
 # IBM CREDENTIALS (use your credentials, do not use my time :) )
-MY_TOKEN = "bvu8zeFlxWA426m5UuarVkM05nbow6_bf7Y7v-Lp18ZQ"
-MY_CRN = "crn:v1:bluemix:public:quantum-computing:us-east:a/41a25b51a97b4a419519ef7eaceadf4c:f31cb64e-2de3-4367-9694-3fc74578e7c7::"
+MY_TOKEN = ""
+MY_CRN = ""
 
 
 # Generic variables
