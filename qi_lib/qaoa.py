@@ -118,29 +118,32 @@ def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, lo
 def plot_histogram(counts, edges, filename="histogram_result.jpg"):
     """
     Plots a histogram where the optimal solutions are green and non-optimal solutions are grey
-    Computes the percetage of optimal solutions (the optimal solution must be adapted)
+    Computes the percentage of optimal solutions
     QI: the same histogram is displayed in the last project created for the run in https://compute.quantum-inspire.com/projects
     """
 
-    # THIS SHOULD BE CHANGED DEPENDING ON THE TEST
-    optimal_cut = 6
-    optimal_hits = 0
-    
-    labels, values, colors = [], [], []
-
-    # Calculate the cut value of each solution
-    for bitstring, count in counts.items():
+    # First pass: calculate cut value for each bitstring to find the optimal
+    cut_values = {}
+    for bitstring in counts.keys():
         nodes = [int(bit) for bit in bitstring]
         current_cut = 0
         for u, v, w in edges:
             if nodes[u] != nodes[v]:
-                current_cut += w  
+                current_cut += w
+        cut_values[bitstring] = current_cut
+
+    optimal_cut = max(cut_values.values())
+    optimal_hits = 0
+    labels, values, colors = [], [], []
+
+    # Second pass: build histogram data with colors based on optimal cut
+    for bitstring, count in counts.items():
         labels.append(bitstring)
         values.append(count)
-        
-        if current_cut == optimal_cut:
+
+        if cut_values[bitstring] == optimal_cut:
             colors.append('#2ecc71')
-            optimal_hits += count 
+            optimal_hits += count
         else:
             colors.append('#95a5a6')
 
