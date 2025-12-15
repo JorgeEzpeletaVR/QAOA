@@ -162,8 +162,10 @@ def plot_histogram(counts, edges, filename="histogram_result.jpg"):
     print(f"Percentage of optimal solutions: {percentage}%")
     text_str = f"Optimal solutions: {percentage:.2f}%"
 
+    top_values=sorted(values,reverse=True)[:10]
+
     plt.figure(figsize=(20, 15))
-    plt.bar(labels, values, color=colors)
+    plt.bar(labels, top_values, color=colors)
     plt.xlabel('Solutions')
     plt.ylabel('Count')
     plt.title('Max-cut histogram')
