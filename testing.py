@@ -7,11 +7,12 @@ This new folder contains:
     - initial_graph_{TEST_NAME}.jpg: the initial graph
     - histogram_{TEST_NAME}.jpg: the histogram with the measurements in the final circuit
     - coloured_graph_{TEST_NAME}.jpg: final division of the nodes  
+    - convergence_{TEST_NAME}.jpg: the graphic with the cost evaluated in each iteration
 The test can be run as follows:
     - To run it in local simulator (LOCAL=True) 
-    - To run it  real hardware (LOCAL=False)
-        · QI hadware: PLATFORM="QI"  and QI_BACKEND and QUBIT_PRIORITY (optional) have to ve specified.
-        · IBM hadware: PLATFORM="IBM".
+    - To run it in any company hardware (LOCAL=False)
+        · QI hadware: PLATFORM="QI" and QI_BACKEND and QUBIT_PRIORITY (optional) have to be specified.
+        · IBM hardware: PLATFORM="IBM" and IBM_SIM=True to run it in ibm_fez simulator or IBM_SIM=False to use the least busy real hardware
 The parametes such as layers (REPS), maximum number of iterations (MAX_ITER), tolerance (TOL), shots made in final measurement
 (NUM_SHOTS),... can be changed.
 """
@@ -34,30 +35,32 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_ibm_runtime import QiskitRuntimeService
 from qiskit_aer import AerSimulator
 
-
 # Name of the test
-TEST_NAME = "COnvergence_test"
+TEST_NAME = "Test"
 os.makedirs(os.path.join("test_results", TEST_NAME), exist_ok=True)
 
-# Defintion of the graph
-N = 5
-# EDGES = [(2, 1, 1.0), (2, 0, 1.0), (2, 3, 1.0), (2, 4, 1.0)]
-EDGES = [(0, 1, 1.0), (0, 2, 1.0), (0, 3, 1.0), (0, 4, 1.0), (1, 2, 1.0), (2, 3, 1.0), (3, 4, 1.0), (4, 1, 1.0)]
-
-
-
+# Definition of the graph
+# Standard graph: 5 Wheel graph
+N = 55
+EDGES = [(0, i, 1.0) for i in range(1, N)] + [(i, i+1, 1.0) for i in range(1, N-1)] +  [(N-1, 1, 1.0)]
 
 # Characteristics of the algorithm
 # Number of evaluations made to estimate the cost function in each iteration
-OPTIMIZER_NUM_SHOTS = 1000
+OPTIMIZER_NUM_SHOTS = 256
 # Number of measurements made to the final circuit (for QI max 2048)
-NODE_GROUPING_NUM_SHOTS = 2048
+NODE_GROUPING_NUM_SHOTS = 1000
 # Maximum number of iterations of the optimizer (min num_vars+2)
 MAX_ITER = 30
 # Tolerance of the optimizer
 TOL = 0.001
 # Layers of the circuit
 REPS = 2
+
+# Generic variables
+#LOCAL = False # Real hardware
+LOCAL = True  # Simulator
+#PLATFORM = "IBM"   
+PLATFORM = "QI"
 
 # Caracteristics of the platform
 # QI 
@@ -71,11 +74,6 @@ MY_CRN = ""
 IBM_SIM=True
 #IBM_SIM=False
 
-# Generic variables
-#PLATFORM = "IBM"   
-PLATFORM = "QI"   
-#LOCAL = False # Real hardware
-LOCAL = True  # Simulator
 BACKEND = None
 
 # Conection
@@ -114,11 +112,9 @@ draw_graph(graph, filename=os.path.join("test_results", TEST_NAME, f"initial_gra
 max_hamiltonian = SparsePauliOp.from_list(graph_to_pauli_list(N, EDGES))
 # Generate ansatz from Hamiltonain
 max_ansatz = QAOAAnsatz(max_hamiltonian, reps=REPS)
-
 # Get initial params
 x0 = get_random_parameters(max_ansatz.num_parameters)
 print("Initial parameters:", x0)
-
 # Optimise circuit parameters
 x = minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, local=LOCAL,platform=PLATFORM, backend=BACKEND, qubit_priority_list=QUBIT_PRIORITY, num_shots=OPTIMIZER_NUM_SHOTS, max_iter=MAX_ITER, tol=TOL)
 print("Optimised parameters:", x)
