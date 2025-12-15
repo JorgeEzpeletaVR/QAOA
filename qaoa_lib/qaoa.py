@@ -96,7 +96,6 @@ def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, lo
         sampler = StatevectorSampler()
         counts = _do_node_groupings(qc, sampler, num_shots=num_shots)
     else:
-        # --- Lógica de Transpilación Diferenciada ---
         if platform == "IBM":
             pm = generate_preset_pass_manager(optimization_level=3, backend=backend)
             qc_transpiled = pm.run(qc)
