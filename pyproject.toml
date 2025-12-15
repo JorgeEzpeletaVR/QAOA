@@ -12,4 +12,7 @@ dependencies = [
     "rustworkx>=0.17.1",
     "qiskit-ibm-runtime>=0.43.1",
     "notebook>=7.5.0",
+    "mitiq>=0.48.1",
+    "ply>=3.11",
+    "qiskit-aer>=0.17.2",
 ]
