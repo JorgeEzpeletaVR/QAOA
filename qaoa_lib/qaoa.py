@@ -158,51 +158,61 @@ def plot_convergence(filename="convergence_result.jpg"):
     plt.savefig(filename, dpi=300, bbox_inches='tight')
 
 
-
+   
 def plot_histogram(counts, edges, filename="histogram_result.jpg"):
     """
-    Plots a histogram where the optimal solutions are green and non-optimal solutions are grey
-    Computes the percentage of optimal solutions
-    QI: the same histogram is displayed in the last project created for the run in https://compute.quantum-inspire.com/projects
+    Plots a histogram where the optimal solutions are green and non-optimal solutions are grey.
+    Computes best_optimal / best_non_optimal.
     """
 
-    # First pass: calculate cut value for each bitstring to find the optimal
-    cut_values = {}
-    for bitstring in counts.keys():
+    optimal_cut = 6
+
+    labels, values, colors = [], [], []
+
+    best_optimal = 0
+    best_non_optimal = 0
+
+    for bitstring, count in counts.items():
         nodes = [int(bit) for bit in reversed(bitstring)]
         current_cut = 0
         for u, v, w in edges:
             if nodes[u] != nodes[v]:
                 current_cut += w
-        cut_values[bitstring] = current_cut
 
-    optimal_cut = max(cut_values.values())
-    optimal_hits = 0
-    labels, values, colors = [], [], []
-
-    # Second pass: build histogram data with colors based on optimal cut
-    for bitstring, count in counts.items():
         labels.append(bitstring)
         values.append(count)
 
-        if cut_values[bitstring] == optimal_cut:
+        if current_cut == optimal_cut:
             colors.append('#2ecc71')
-            optimal_hits += count
+            best_optimal = max(best_optimal, count)
         else:
             colors.append('#95a5a6')
+            best_non_optimal = max(best_non_optimal, count)
 
-    # Calculate the percentage of optimal solutions
-    percentage=optimal_hits / sum(values) * 100
-    print(f"Percentage of optimal solutions: {percentage}%")
-    text_str = f"Optimal solutions: {percentage:.2f}%"
 
-    top_values=sorted(values,reverse=True)[:10]
+    combined_sorted = sorted(zip(labels, values, colors), key=lambda x: x[1], reverse=True)[:10]
+    labels, values, colors = zip(*combined_sorted)
+
+
+    if best_non_optimal > 0:
+        delta = best_optimal / best_non_optimal
+    else:
+        delta = best_optimal 
+    
+    text_str = f"opt_dominance: {delta:.2f}"
 
     plt.figure(figsize=(20, 15))
-    plt.bar(labels, top_values, color=colors)
+    plt.bar(labels, values, color=colors)
     plt.xlabel('Solutions')
     plt.ylabel('Count')
-    plt.title('Max-cut histogram')
-    plt.text(0.95, 0.95, text_str, transform=plt.gca().transAxes, fontsize=26,verticalalignment='top', horizontalalignment='right',bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    plt.title('Max-cut histogram (Top 10)')
+    plt.text(
+        0.95, 0.95, text_str,
+        transform=plt.gca().transAxes,
+        fontsize=26,
+        verticalalignment='top',
+        horizontalalignment='right',
+        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8)
+    )
     plt.savefig(filename)
     plt.close()
