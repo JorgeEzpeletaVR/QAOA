@@ -24,7 +24,7 @@ from qiskit.quantum_info import SparsePauliOp
 
 # Graph
 from qaoa_lib.graphs import create_graph, draw_graph, graph_to_pauli_list
-from qaoa_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_node_groupings_from_circuit_parameters, plot_histogram, cost_func
+from qaoa_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_node_groupings_from_circuit_parameters, plot_histogram, cost_func, plot_convergence
 
 # QI
 from qiskit_quantuminspire.qi_provider import QIProvider
@@ -36,20 +36,24 @@ from qiskit_aer import AerSimulator
 
 
 # Name of the test
-TEST_NAME = "QI_T5_Topology_Exact"
+TEST_NAME = "COnvergence_test"
 os.makedirs(os.path.join("test_results", TEST_NAME), exist_ok=True)
 
 # Defintion of the graph
 N = 5
-EDGES = [(2, 1, 1.0), (2, 0, 1.0), (2, 3, 1.0), (2, 4, 1.0)]
+# EDGES = [(2, 1, 1.0), (2, 0, 1.0), (2, 3, 1.0), (2, 4, 1.0)]
+EDGES = [(0, 1, 1.0), (0, 2, 1.0), (0, 3, 1.0), (0, 4, 1.0), (1, 2, 1.0), (2, 3, 1.0), (3, 4, 1.0), (4, 1, 1.0)]
+
+
+
 
 # Characteristics of the algorithm
 # Number of evaluations made to estimate the cost function in each iteration
-OPTIMIZER_NUM_SHOTS = 256
+OPTIMIZER_NUM_SHOTS = 1000
 # Number of measurements made to the final circuit (for QI max 2048)
-NODE_GROUPING_NUM_SHOTS = 1024
+NODE_GROUPING_NUM_SHOTS = 2048
 # Maximum number of iterations of the optimizer (min num_vars+2)
-MAX_ITER = 20
+MAX_ITER = 30
 # Tolerance of the optimizer
 TOL = 0.001
 # Layers of the circuit
@@ -59,7 +63,7 @@ REPS = 2
 # QI 
 BACKEND_QI = "Tuna-5"
 #BACKEND_QI = "QX emulator"
-QUBIT_PRIORITY =  [2, 1, 0, 3, 4]
+QUBIT_PRIORITY =  [0, 1, 2, 3, 4]
 
 # IBM CREDENTIALS (use your credentials, do not use my time :) )
 MY_TOKEN = ""
@@ -67,12 +71,11 @@ MY_CRN = ""
 IBM_SIM=True
 #IBM_SIM=False
 
-
 # Generic variables
 #PLATFORM = "IBM"   
 PLATFORM = "QI"   
-LOCAL = False # Real hardware
-#LOCAL = True  # Simulator
+#LOCAL = False # Real hardware
+LOCAL = True  # Simulator
 BACKEND = None
 
 # Conection
@@ -125,3 +128,4 @@ node_groupings, counts = get_node_groupings_from_circuit_parameters(max_ansatz, 
 print("Node groupings:", node_groupings)
 plot_histogram(counts, EDGES, filename=os.path.join("test_results", TEST_NAME, f"histogram_{TEST_NAME}.jpg"))
 draw_graph(graph, filename=os.path.join("test_results", TEST_NAME, f"coloured_graph_{TEST_NAME}.jpg"), node_color=["r" if node_groupings[i] == 0 else "c" for i in range(N)])
+plot_convergence(filename=os.path.join("test_results", TEST_NAME, f"convergence_{TEST_NAME}.jpg"))

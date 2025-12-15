@@ -10,6 +10,8 @@ from qiskit_ibm_runtime.sampler import SamplerV2 as Sampler
 from scipy.optimize import minimize
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
+objective_func_vals = []
+
 
 def get_random_parameters(num_params):
     """
@@ -73,6 +75,7 @@ def cost_func(params, ansatz, hamiltonian, estimator):
     """
     pub = (ansatz, hamiltonian, params)
     cost = estimator.run([pub]).result()[0].data.evs
+    objective_func_vals.append(cost)
     return cost
 
 
@@ -112,6 +115,14 @@ def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, lo
     # Convert the measurement tallies to node groupings
     binary_string = max(counts.items(), key=lambda kv: kv[1])[0]
     return [int(y) for y in reversed(list(binary_string))], counts
+
+def plot_convergence(filename="convergence_result.jpg"):
+    plt.figure(figsize=(12, 6))
+    plt.plot(objective_func_vals)
+    plt.xlabel("Iteration")
+    plt.ylabel("Cost")
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+
 
 
 def plot_histogram(counts, edges, filename="histogram_result.jpg"):
