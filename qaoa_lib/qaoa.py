@@ -14,11 +14,12 @@ from scipy.optimize import minimize
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 
-def get_random_parameters(num_params):
+def get_random_parameters(num_params,seed=99):
     """
     Get random initial circuit parameters for optimization
     """
-    return 2 * np.pi * np.random.rand(num_params)
+    rng = np.random.default_rng(seed)
+    return 2 * np.pi * rng.random(num_params)
 
 
 def _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian, estimator, max_iter, tol):
