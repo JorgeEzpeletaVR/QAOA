@@ -41,7 +41,7 @@ os.makedirs(os.path.join("test_results", TEST_NAME), exist_ok=True)
 
 # Definition of the graph
 # Standard graph: 5 Wheel graph
-N = 55
+N = 5
 EDGES = [(0, i, 1.0) for i in range(1, N)] + [(i, i+1, 1.0) for i in range(1, N-1)] +  [(N-1, 1, 1.0)]
 
 # Characteristics of the algorithm
