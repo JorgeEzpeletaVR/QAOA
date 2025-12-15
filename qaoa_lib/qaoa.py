@@ -124,7 +124,7 @@ def plot_histogram(counts, edges, filename="histogram_result.jpg"):
     # First pass: calculate cut value for each bitstring to find the optimal
     cut_values = {}
     for bitstring in counts.keys():
-        nodes = [int(bit) for bit in bitstring]
+        nodes = [int(bit) for bit in reversed(bitstring)]
         current_cut = 0
         for u, v, w in edges:
             if nodes[u] != nodes[v]:

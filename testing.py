@@ -32,41 +32,47 @@ from qiskit_quantuminspire.qi_provider import QIProvider
 # IBM
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_ibm_runtime import QiskitRuntimeService
+from qiskit_aer import AerSimulator
 
 
 # Name of the test
-TEST_NAME = "IBM"
+TEST_NAME = "QI_T5_Topology_Exact"
 os.makedirs(os.path.join("test_results", TEST_NAME), exist_ok=True)
 
 # Defintion of the graph
 N = 5
-EDGES = [(0, 1, 1.0), (0, 2, 1.0), (0, 3, 1.0), (0, 4, 1.0), (1, 2, 1.0), (2, 3, 1.0), (3, 4, 1.0), (4, 1, 1.0)]
+EDGES = [(2, 1, 1.0), (2, 0, 1.0), (2, 3, 1.0), (2, 4, 1.0)]
 
 # Characteristics of the algorithm
 # Number of evaluations made to estimate the cost function in each iteration
-OPTIMIZER_NUM_SHOTS = 128
+OPTIMIZER_NUM_SHOTS = 256
 # Number of measurements made to the final circuit (for QI max 2048)
 NODE_GROUPING_NUM_SHOTS = 1024
 # Maximum number of iterations of the optimizer (min num_vars+2)
-MAX_ITER = 4
+MAX_ITER = 20
 # Tolerance of the optimizer
 TOL = 0.001
 # Layers of the circuit
-REPS = 1
+REPS = 2
 
 # Caracteristics of the platform
 # QI 
-BACKEND_QI = "QX emulator"
-QUBIT_PRIORITY =  [0, 1, 2, 3, 4]
+BACKEND_QI = "Tuna-5"
+#BACKEND_QI = "QX emulator"
+QUBIT_PRIORITY =  [2, 1, 0, 3, 4]
 
 # IBM CREDENTIALS (use your credentials, do not use my time :) )
 MY_TOKEN = ""
 MY_CRN = ""
+IBM_SIM=True
+#IBM_SIM=False
 
 
 # Generic variables
-PLATFORM = "IBM"     # Options: "IBM" or "QI"
-LOCAL = False        # True --> Simulator, False --> Real hardware
+#PLATFORM = "IBM"   
+PLATFORM = "QI"   
+LOCAL = False # Real hardware
+#LOCAL = True  # Simulator
 BACKEND = None
 
 # Conection
@@ -77,10 +83,19 @@ else:
     if PLATFORM == "IBM":
         if not MY_TOKEN or not MY_CRN:
             raise ValueError("ERROR: Para ejecutar en IBM hardware necesitas definir MY_TOKEN y MY_CRN.")
-        service = QiskitRuntimeService(channel="ibm_cloud", token=MY_TOKEN, instance=MY_CRN)
-        BACKEND = service.least_busy(operational=True, simulator=False, min_num_qubits=127)
-        QUBIT_PRIORITY = None 
-        backend_name=BACKEND.name
+        
+        if IBM_SIM:
+            service = QiskitRuntimeService(channel="ibm_cloud", token=MY_TOKEN, instance=MY_CRN)
+            backend = service.backend("ibm_fez")
+            backend_name="ibm_fez_simulator"
+            BACKEND = AerSimulator.from_backend(backend)
+
+        else:
+            service = QiskitRuntimeService(channel="ibm_cloud", token=MY_TOKEN, instance=MY_CRN)
+            BACKEND = service.least_busy(operational=True, simulator=False, min_num_qubits=127)
+            QUBIT_PRIORITY = None 
+            backend_name=BACKEND.name
+
     elif PLATFORM == "QI":
         BACKEND = BACKEND_QI 
         provider = QIProvider()
