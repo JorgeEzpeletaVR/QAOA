@@ -59,13 +59,13 @@ REPS = 2
 # Generic variables
 #LOCAL = False # Real hardware
 LOCAL = True  # Simulator
-#PLATFORM = "IBM"   
-PLATFORM = "QI"
+PLATFORM = "IBM"   
+#PLATFORM = "QI"
 
 # Caracteristics of the platform
 # QI 
-BACKEND_QI = "Tuna-5"
-#BACKEND_QI = "QX emulator"
+#BACKEND_QI = "Tuna-5"
+BACKEND_QI = "QX emulator"
 QUBIT_PRIORITY =  [0, 1, 2, 3, 4]
 
 # IBM CREDENTIALS (use your credentials, do not use my time :) )
@@ -83,7 +83,7 @@ if LOCAL:
 else:
     if PLATFORM == "IBM":
         if not MY_TOKEN or not MY_CRN:
-            raise ValueError("ERROR: Para ejecutar en IBM hardware necesitas definir MY_TOKEN y MY_CRN.")
+            raise ValueError("ERROR: To execute the algorithm in IBM hardware, MY_TOKEN and MY_CRN must be defined")
         
         if IBM_SIM:
             service = QiskitRuntimeService(channel="ibm_cloud", token=MY_TOKEN, instance=MY_CRN)
@@ -103,7 +103,6 @@ else:
         BACKEND = provider.get_backend(BACKEND_QI)
         backend_name=BACKEND.name
     
-open(os.path.join("test_results", TEST_NAME, f"config_{TEST_NAME}.txt"), "w").write(f"TEST_NAME={TEST_NAME}\nBACKEND={backend_name}\nN={N}\nEDGES={EDGES}\nOPTIMIZER_NUM_SHOTS={OPTIMIZER_NUM_SHOTS}\nNODE_GROUPING_NUM_SHOTS={NODE_GROUPING_NUM_SHOTS}\nMAX_ITER={MAX_ITER}\nTOL={TOL}\nREPS={REPS}\n")
 
 graph = create_graph(N, EDGES)
 draw_graph(graph, filename=os.path.join("test_results", TEST_NAME, f"initial_graph_{TEST_NAME}.jpg"))
@@ -122,6 +121,8 @@ print("Optimised parameters:", x)
 # Solution
 node_groupings, counts = get_node_groupings_from_circuit_parameters(max_ansatz, x, local=LOCAL, platform=PLATFORM, backend=BACKEND, qubit_priority_list=QUBIT_PRIORITY, num_shots=NODE_GROUPING_NUM_SHOTS)
 print("Node groupings:", node_groupings)
-plot_histogram(counts, EDGES, filename=os.path.join("test_results", TEST_NAME, f"histogram_{TEST_NAME}.jpg"))
+open(os.path.join("test_results", TEST_NAME, f"config_{TEST_NAME}.txt"), "w").write(f"TEST_NAME={TEST_NAME}\nBACKEND={backend_name}\nN={N}\nEDGES={EDGES}\nOPTIMIZER_NUM_SHOTS={OPTIMIZER_NUM_SHOTS}\nNODE_GROUPING_NUM_SHOTS={NODE_GROUPING_NUM_SHOTS}\nMAX_ITER={MAX_ITER}\nTOL={TOL}\nREPS={REPS}\nINITIAL_PARAMS={list(x0)}\n")
+top_solution, top_cut= plot_histogram(counts, EDGES, filename=os.path.join("test_results", TEST_NAME, f"histogram_{TEST_NAME}.jpg"))
+open(os.path.join("test_results", TEST_NAME, f"final_results_{TEST_NAME}.txt"), "w").write(f"Best Solution: {top_solution}\nCut Value: {top_cut}\nFinal Parameters: {x}\n")
 draw_graph(graph, filename=os.path.join("test_results", TEST_NAME, f"coloured_graph_{TEST_NAME}.jpg"), node_color=["r" if node_groupings[i] == 0 else "c" for i in range(N)])
 plot_convergence(filename=os.path.join("test_results", TEST_NAME, f"convergence_{TEST_NAME}.jpg"))

@@ -204,7 +204,6 @@ def plot_convergence(filename="convergence_result.jpg"):
     plt.ylabel("Cost")
     plt.savefig(filename, dpi=300, bbox_inches='tight')
 
-
    
 def plot_histogram(counts, edges, filename="histogram_result.jpg"):
     """
@@ -268,3 +267,5 @@ def plot_histogram(counts, edges, filename="histogram_result.jpg"):
     plt.text(0.95, 0.95, text_str,transform=plt.gca().transAxes,fontsize=26,verticalalignment='top',horizontalalignment='right',bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     plt.savefig(filename)
     plt.close()
+
+    return labels[0], cut_values[labels[0]]
