@@ -1,17 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mitiq.zne import RichardsonFactory
-from mitiq.zne.scaling import fold_global
 from qiskit import transpile
-from qiskit._accelerate.circuit import DAGCircuit
 from qiskit.primitives import StatevectorEstimator
 from qiskit.primitives import StatevectorSampler
 from qiskit_ibm_runtime import EstimatorOptions
 from qiskit_ibm_runtime import Session
 from qiskit_ibm_runtime.estimator import EstimatorV2 as Estimator
 from qiskit_ibm_runtime.sampler import SamplerV2 as Sampler
-from scipy.optimize import minimize
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
+from scipy.optimize import minimize
+from qaoa_lib.error_mitigation_lib import get_cost_func_ZNE
 
 
 def get_random_parameters(num_params,seed=99):
@@ -29,7 +27,7 @@ def _do_circ_param_minimising(cost_func, x0, max_ansatz, max_hamiltonian, estima
     return minimize(cost_func, x0, args=(max_ansatz, max_hamiltonian, estimator), method="COBYLA",options={'maxiter': max_iter, 'tol': tol})
 
 
-def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, local=True, platform, backend, qubit_priority_list, num_shots, max_iter=30,tol=0.001):
+def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, local=True, platform, backend, qubit_priority_list, num_shots, max_iter=30,tol=0.001, run_zne=False):
     """
     Minimise cost function (cost_func) for a given random start parameter (x0) for a given ansatz (max_ansatz) and hamiltonian (max_hamiltonian)
     Parameters:
@@ -68,6 +66,10 @@ def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, l
             with Session(backend=backend) as session:
                 estimator = Estimator(mode=session, options=EstimatorOptions(resilience_level=1, default_shots=num_shots, max_execution_time=3600))
                 result = _do_circ_param_minimising(cost_func, x0, max_ansatz_transpiled, max_hamiltonian_mapped, estimator, max_iter, tol)
+                if run_zne:
+                    cost_func_val = get_cost_func_ZNE(result.x, max_ansatz_transpiled, max_hamiltonian_mapped, estimator)
+                else:
+                    cost_func_val = get_cost_func(result.x, max_ansatz_transpiled, max_hamiltonian_mapped, estimator)
 
         elif platform=="IBM":
             pm = generate_preset_pass_manager(optimization_level=3, backend=backend)
@@ -78,10 +80,10 @@ def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, l
             result = _do_circ_param_minimising(cost_func, x0, max_ansatz_transpiled, max_hamiltonian_mapped, estimator, max_iter, tol)
     
     # We only care about the circuit parameters in the result
-    return result.x
+    return (result.x, cost_func_val)
 
 
-def cost_func(params, ansatz, hamiltonian, estimator):
+def get_cost_func(params, ansatz, hamiltonian, estimator):
     """Return estimate of energy from estimator
 
     Parameters:
@@ -98,36 +100,6 @@ def cost_func(params, ansatz, hamiltonian, estimator):
     objective_func_vals.append(cost)
     return cost
 
-
-def cost_func_ZNE(params, ansatz, hamiltonian, estimator):
-    ZNE_SCALE_FACTORS = [1, 3, 5]
-    ZNE_FACTORY = RichardsonFactory(ZNE_SCALE_FACTORS)
-
-    # Mitiq's folding transpiler assigns to _global_phase on DAGCircuit. The accelerated
-    # DAGCircuit exposes a read-only attribute, so we override with a writable property
-    # mapped to the public global_phase attribute.
-    if not isinstance(getattr(DAGCircuit, "_global_phase", None), property):
-        def _get_global_phase(self):
-            return self.global_phase
-        def _set_global_phase(self, val):
-            self.global_phase = val
-        DAGCircuit._global_phase = property(_get_global_phase, _set_global_phase)
-
-    bound_ansatz = ansatz.assign_parameters(params)
-
-    energies = []
-    for scale in ZNE_SCALE_FACTORS:
-        folded = fold_global(bound_ansatz, scale_factor=scale)
-
-        # Ensure folded circuit is compatible with the backend (e.g. strip unsupported ops).
-        backend = getattr(estimator, "_backend", None)
-        if backend is not None:
-            folded = transpile(folded, backend=backend, optimization_level=1)
-
-        energy = estimator.run([(folded, hamiltonian, [])]).result()[0].data.evs
-        energies.append(energy)
-
-    return ZNE_FACTORY.extrapolate(ZNE_SCALE_FACTORS, energies)
 
 
 def _do_node_groupings(qc, sampler, *, num_shots):
