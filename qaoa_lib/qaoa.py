@@ -50,6 +50,7 @@ def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, l
     # Gobal variable to store the evaluated cost in each iteration
     global objective_func_vals
     objective_func_vals = []
+    cost_func_val = 0
     
     if local:
         estimator = StatevectorEstimator()
