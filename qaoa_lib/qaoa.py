@@ -9,7 +9,7 @@ from qiskit_ibm_runtime.estimator import EstimatorV2 as Estimator
 from qiskit_ibm_runtime.sampler import SamplerV2 as Sampler
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from scipy.optimize import minimize
-from qaoa_lib.error_mitigation_lib import get_cost_func_ZNE
+from qaoa_lib.error_mitigation import get_cost_func_ZNE
 
 
 def get_random_parameters(num_params,seed=99):
@@ -42,6 +42,7 @@ def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, l
         num_shots (int): Number of shots per energy estimation in the optimizer
         max_iter (int, optional): Maximum number of iterations for the COBYLA optimizer (default: 30)
         tol (float, optional): Tolerance for convergence in the COBYLA optimizer (default: 0.001)
+        run_zne (bool): If True, zero noise extrapolation will be performed; otherwise not
 
     Returns:
         ndarray: The optimized circuit parameters (angles) that minimize the cost function
