@@ -201,8 +201,8 @@ def plot_histogram(counts, edges, filename="histogram_result.jpg"):
 
     # Construction of the histogram
     labels, values, colors = [], [], []
-    best_optimal = 0
-    best_non_optimal = 0
+    optimal_cut = max(cut_values.values())
+    optimal_hits = 0
 
     for bitstring, count in counts.items():
         nodes = [int(bit) for bit in reversed(bitstring)]
@@ -216,21 +216,16 @@ def plot_histogram(counts, edges, filename="histogram_result.jpg"):
 
         if current_cut == optimal_cut:
             colors.append('#2ecc71')
-            best_optimal = max(best_optimal, count)
+            optimal_hits += count
         else:
             colors.append('#95a5a6')
-            best_non_optimal = max(best_non_optimal, count)
 
+    percentage=optimal_hits / sum(values) * 100
+    print(f"Percentage of optimal solutions: {percentage}%")
+    text_str = f"Optimal solutions: {percentage:.2f}%"
 
     combined_sorted = sorted(zip(labels, values, colors), key=lambda x: x[1], reverse=True)[:10]
     labels, values, colors = zip(*combined_sorted)
-
-    # Calculation of the Optimal Dominance: the ratio of the most frequent optimal solution's count to the most frequent non-optimal solution's count.
-    if best_non_optimal > 0:
-        delta = best_optimal / best_non_optimal
-    else:
-        delta = best_optimal 
-    text_str = f"opt_dominance: {delta:.2f}"
 
     plt.figure(figsize=(20, 15))
     plt.bar(labels, values, color=colors)
