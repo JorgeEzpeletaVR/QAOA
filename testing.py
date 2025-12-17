@@ -119,17 +119,15 @@ x0 = get_random_parameters(max_ansatz.num_parameters)
 print("Initial parameters:", x0)
 
 # Optimise circuit parameters
-start_time = time()
 x, cost_func_val = minimise_circuit_parameters(get_cost_func, x0, max_ansatz, max_hamiltonian, local=LOCAL,platform=PLATFORM, backend=BACKEND, qubit_priority_list=QUBIT_PRIORITY, num_shots=OPTIMIZER_NUM_SHOTS, max_iter=MAX_ITER, tol=TOL, run_zne=RUN_ZNE)
 print("Optimised parameters:", x)
 print("Cost function value:", cost_func_val)
-end_time = time()
 
 # Solution
 node_groupings, counts = get_node_groupings_from_circuit_parameters(max_ansatz, x, local=LOCAL, platform=PLATFORM, backend=BACKEND, qubit_priority_list=QUBIT_PRIORITY, num_shots=NODE_GROUPING_NUM_SHOTS)
 print("Node groupings:", node_groupings)
 open(os.path.join("test_results", TEST_NAME, f"config_{TEST_NAME}.txt"), "w").write(f"TEST_NAME={TEST_NAME}\nBACKEND={backend_name}\nN={N}\nEDGES={EDGES}\nOPTIMIZER_NUM_SHOTS={OPTIMIZER_NUM_SHOTS}\nNODE_GROUPING_NUM_SHOTS={NODE_GROUPING_NUM_SHOTS}\nMAX_ITER={MAX_ITER}\nTOL={TOL}\nREPS={REPS}\nINITIAL_PARAMS={list(x0)}\n")
 top_solution, top_cut= plot_histogram(counts, EDGES, filename=os.path.join("test_results", TEST_NAME, f"histogram_{TEST_NAME}.jpg"))
-open(os.path.join("test_results", TEST_NAME, f"final_results_{TEST_NAME}.txt"), "w").write(f"Best Solution: {top_solution}\nCut Value: {top_cut}\nInitial Parameters: {x0}\nFinal Parameters: {x}\nFinal Cost Function Value: {cost_func_val}\nTotal time: {end_time-start_time} secs\n")
+open(os.path.join("test_results", TEST_NAME, f"final_results_{TEST_NAME}.txt"), "w").write(f"Best Solution: {top_solution}\nCut Value: {top_cut}\nInitial Parameters: {x0}\nFinal Parameters: {x}\nFinal Cost Function Value: {cost_func_val}\n")
 draw_graph(graph, filename=os.path.join("test_results", TEST_NAME, f"coloured_graph_{TEST_NAME}.jpg"), node_color=["r" if node_groupings[i] == 0 else "c" for i in range(N)])
 plot_convergence(filename=os.path.join("test_results", TEST_NAME, f"convergence_{TEST_NAME}.jpg"))
