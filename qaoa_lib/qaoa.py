@@ -80,6 +80,7 @@ def minimise_circuit_parameters(cost_func, x0, max_ansatz, max_hamiltonian, *, l
             # No Session in IBM
             estimator = Estimator(mode=backend, options=EstimatorOptions(resilience_level=1, default_shots=num_shots))
             result = _do_circ_param_minimising(cost_func, x0, max_ansatz_transpiled, max_hamiltonian_mapped, estimator, max_iter, tol)
+            cost_func_val = get_cost_func(result.x, max_ansatz_transpiled, max_hamiltonian_mapped, estimator)
     
     # We only care about the circuit parameters in the result
     return (result.x, cost_func_val)
