@@ -4,6 +4,19 @@ from qiskit._accelerate.circuit import DAGCircuit
 from qiskit import transpile
 
 def get_cost_func_ZNE(params, ansatz, hamiltonian, estimator):
+    """
+    Return estimate of energy from estimator applying Zero Noise Extrapolation
+
+    Parameters:
+        params (ndarray): Array of ansatz parameters
+        ansatz (QuantumCircuit): Parameterized ansatz circuit
+        hamiltonian (SparsePauliOp): Operator representation of Hamiltonian
+        estimator (Estimator): Estimator primitive instance
+
+    Returns:
+        float: Energy estimate
+    """
+
     ZNE_SCALE_FACTORS = [1, 3, 5]
     ZNE_FACTORY = RichardsonFactory(ZNE_SCALE_FACTORS)
 
