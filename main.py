@@ -1,22 +1,3 @@
-"""
-This program can run a test for Max-cut in various platforms.
-Different TEST_NAME should be specified in each different run.
-In each run, a folder with the name of the test in /test_results is created.
-This new folder contains:
-    - config_{TEST_NAME}.txt: characteristics of the test
-    - initial_graph_{TEST_NAME}.jpg: the initial graph
-    - histogram_{TEST_NAME}.jpg: the histogram with the measurements in the final circuit
-    - coloured_graph_{TEST_NAME}.jpg: final division of the nodes  
-    - convergence_{TEST_NAME}.jpg: the graphic with the cost evaluated in each iteration
-The test can be run as follows:
-    - To run it in local simulator (LOCAL=True) 
-    - To run it in any company hardware (LOCAL=False)
-        · QI hadware: PLATFORM="QI" and QI_BACKEND and QUBIT_PRIORITY (optional) have to be specified.
-        · IBM hardware: PLATFORM="IBM" and IBM_SIM=True to run it in ibm_fez simulator or IBM_SIM=False to use the least busy real hardware
-The parametes such as layers (REPS), maximum number of iterations (MAX_ITER), tolerance (TOL), shots made in final measurement
-(NUM_SHOTS),... can be changed.
-"""
-
 import os
 
 # QAOA
@@ -35,10 +16,6 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_ibm_runtime import QiskitRuntimeService
 from qiskit_aer import AerSimulator
 
-# Name of the test
-TEST_NAME = "Test"
-os.makedirs(os.path.join("test_results", TEST_NAME), exist_ok=True)
-
 # Definition of the graph
 # Standard graph: 5 Wheel graph
 N = 5
@@ -56,6 +33,10 @@ TOL = 0.001
 # Layers of the circuit
 REPS = 2
 
+# Name of the test
+TEST_NAME = "Test"
+os.makedirs(os.path.join("test_results", TEST_NAME), exist_ok=True)
+
 # Defaults (local simulator)
 LOCAL = True
 PLATFORM = None
@@ -72,12 +53,12 @@ RUN_ZNE = False
 # BACKEND_NAME = "QX emulator"
 # QUBIT_PRIORITY =  [0, 1, 2, 3, 4]
 
-# -- QI - QX Emulator --
+# -- QI - Tuna-5 --
 # LOCAL = False
 # PLATFORM = "QI"
 # BACKEND_NAME = "Tuna-5"
 # Qubit priority from: https://github.com/DiCarloLab-Delft/QuantumInspireUtilities/blob/main/getting_started_tuna5.ipynb
-# QUBIT_PRIORITY =  [0, 1, 2, 3, 4]
+# QUBIT_PRIORITY =  [2, 0, 1, 3, 4]
 
 # -- IBM - Fez --
 # LOCAL = False
