@@ -28,6 +28,3 @@ def graph_to_pauli_list(num_nodes, edges):
         pauli_str[num_nodes - 1 - j] = 'Z'
         out.append((''.join(pauli_str), weight))
     return out
-
-def get_eigenvalue_offset(edges):
-    return -sum(edge[2] for edge in edges) / 2
