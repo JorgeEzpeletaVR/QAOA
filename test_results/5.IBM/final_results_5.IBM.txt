@@ -1,3 +1,0 @@
-Best Solution: 01010
-Cut Value: 6.0
-Final Parameters: [4.18510293 3.24746701 3.36238427 6.14950677]

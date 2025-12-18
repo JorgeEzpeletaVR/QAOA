@@ -1,6 +1,0 @@
-Best Solution: 01010
-Cut Value: 6.0
-Initial Parameters: [3.1794845  3.55057544 3.21646284 6.10842713]
-Final Parameters: [4.24928355 3.33659299 3.34070741 6.07982592]
-Final Cost Function Value: -2.265625
-Total time: 224.58960270881653 secs
