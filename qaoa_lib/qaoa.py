@@ -12,9 +12,9 @@ from scipy.optimize import minimize
 from qaoa_lib.error_mitigation import get_cost_func_ZNE
 
 
-def get_random_parameters(num_params,seed=99):
+def get_random_parameters(num_params, seed=99):
     """
-    Get random initial circuit parameters for optimization
+    Get random initial circuit parameters (optional seed, for result comparisons)
     """
     rng = np.random.default_rng(seed)
     return 2 * np.pi * rng.random(num_params)

@@ -2,6 +2,12 @@ import rustworkx as rx
 from rustworkx.visualization import mpl_draw
 
 def create_graph(num_nodes, edges):
+    """
+    Create rustworkx graph
+    
+    :param num_nodes: Number of nodes
+    :param edges: List of 3-tuples (node_a, node_b, weight)
+    """
     out = rx.PyGraph()
     out.add_nodes_from(range(num_nodes))
     # The edge syntax is (start, end, weight)
@@ -9,6 +15,9 @@ def create_graph(num_nodes, edges):
     return out
 
 def draw_graph(graph, filename="graph.jpg", node_color=None):
+    """
+    Output rustworkx graph to jpeg file
+    """
     if node_color is None:
         node_color = "#1192E8"
     mpl_draw(
@@ -17,8 +26,8 @@ def draw_graph(graph, filename="graph.jpg", node_color=None):
 
 
 def graph_to_pauli_list(num_nodes, edges):
-    """Convert graph edges to a MaxCut Hamiltonian.
-
+    """
+    Convert graph edges to a MaxCut Hamiltonian.
     Each edge (i, j) becomes a ZZ term acting on qubits i and j.
     """
     out = []
