@@ -105,7 +105,7 @@ def get_cost_func(params, ansatz, hamiltonian, estimator):
 
 
 
-def _do_node_groupings(qc, sampler, *, num_shots):
+def _do_sampling(qc, sampler, *, num_shots):
     """
     Helper function for repeated code in circuit param to node grouping function. Repeatedly sample the ansatz circuit, with the optimised parameters
 
@@ -123,7 +123,7 @@ def _do_node_groupings(qc, sampler, *, num_shots):
 
 
 
-def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, local=True, platform, backend, qubit_priority_list, num_shots):
+def sample_from_circuit_parameters(max_ansatz, min_circ_param, *, local=True, platform, backend, qubit_priority_list, num_shots):
     """Run the optimized ansatz to measure the final solution (node partition).
 
     Parameters:
@@ -146,20 +146,20 @@ def get_node_groupings_from_circuit_parameters(max_ansatz, min_circ_param, *, lo
 
     if local:
         sampler = StatevectorSampler()
-        counts = _do_node_groupings(qc, sampler, num_shots=num_shots)
+        counts = _do_sampling(qc, sampler, num_shots=num_shots)
     else:
         if platform == "IBM":
             pm = generate_preset_pass_manager(optimization_level=3, backend=backend)
             qc_transpiled = pm.run(qc)
             sampler = Sampler(mode=backend)
-            counts = _do_node_groupings(qc_transpiled, sampler, num_shots=num_shots)
+            counts = _do_sampling(qc_transpiled, sampler, num_shots=num_shots)
 
         elif platform == "QI":
             initial_layout = qubit_priority_list[0:qc.num_qubits] if qubit_priority_list else None
             qc_transpiled = transpile(qc, backend=backend, initial_layout=initial_layout)
             with Session(backend=backend) as session:
                 sampler = Sampler(mode=session)
-                counts = _do_node_groupings(qc_transpiled, sampler, num_shots=num_shots)
+                counts = _do_sampling(qc_transpiled, sampler, num_shots=num_shots)
 
     # Convert the measurement tallies to node groupings
     binary_string = max(counts.items(), key=lambda kv: kv[1])[0]

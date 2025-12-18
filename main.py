@@ -25,7 +25,7 @@ from qiskit.quantum_info import SparsePauliOp
 
 # Graph
 from qaoa_lib.graphs import create_graph, draw_graph, graph_to_pauli_list
-from qaoa_lib.qaoa import get_random_parameters, minimise_circuit_parameters, get_node_groupings_from_circuit_parameters, plot_histogram, get_cost_func, plot_convergence
+from qaoa_lib.qaoa import get_random_parameters, minimise_circuit_parameters, sample_from_circuit_parameters, plot_histogram, get_cost_func, plot_convergence
 
 # QI
 from qiskit_quantuminspire.qi_provider import QIProvider
@@ -132,11 +132,16 @@ x, cost_func_val = minimise_circuit_parameters(get_cost_func, x0, max_ansatz, ma
 print("Optimised parameters:", x)
 print("Cost function value:", cost_func_val)
 
-# Solution
-node_groupings, counts = get_node_groupings_from_circuit_parameters(max_ansatz, x, local=LOCAL, platform=PLATFORM, backend=BACKEND, qubit_priority_list=QUBIT_PRIORITY, num_shots=NODE_GROUPING_NUM_SHOTS)
+# Sample optimal circuit parameters
+node_groupings, counts = sample_from_circuit_parameters(max_ansatz, x, local=LOCAL, platform=PLATFORM, backend=BACKEND, qubit_priority_list=QUBIT_PRIORITY, num_shots=NODE_GROUPING_NUM_SHOTS)
+# Save raw results
 print("Node groupings:", node_groupings)
 open(os.path.join("test_results", TEST_NAME, f"config_{TEST_NAME}.txt"), "w").write(f"TEST_NAME={TEST_NAME}\nBACKEND={BACKEND_NAME}\nN={N}\nEDGES={EDGES}\nOPTIMIZER_NUM_SHOTS={OPTIMIZER_NUM_SHOTS}\nNODE_GROUPING_NUM_SHOTS={NODE_GROUPING_NUM_SHOTS}\nMAX_ITER={MAX_ITER}\nTOL={TOL}\nREPS={REPS}\nINITIAL_PARAMS={list(x0)}\n")
-top_solution, top_cut= plot_histogram(counts, EDGES, filename=os.path.join("test_results", TEST_NAME, f"histogram_{TEST_NAME}.jpg"))
+# Plot histogram
+top_solution, top_cut = plot_histogram(counts, EDGES, filename=os.path.join("test_results", TEST_NAME, f"histogram_{TEST_NAME}.jpg"))
+# Add optimal solution to test results
 open(os.path.join("test_results", TEST_NAME, f"final_results_{TEST_NAME}.txt"), "w").write(f"Best Solution: {top_solution}\nCut Value: {top_cut}\nInitial Parameters: {x0}\nFinal Parameters: {x}\nFinal Cost Function Value: {cost_func_val}\n")
+# Draw graph again, with optimal max cut drawn
 draw_graph(graph, filename=os.path.join("test_results", TEST_NAME, f"coloured_graph_{TEST_NAME}.jpg"), node_color=["r" if node_groupings[i] == 0 else "c" for i in range(N)])
+# Plot convergence
 plot_convergence(filename=os.path.join("test_results", TEST_NAME, f"convergence_{TEST_NAME}.jpg"))
